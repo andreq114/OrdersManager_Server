@@ -25,6 +25,7 @@ void MainWindow::connectSignals(){
     connect(server,SIGNAL(serverStopped()),this,SLOT(serverStopped()));
     connect(server,SIGNAL(onOrderOperation(int,int)),this,SLOT(changeOrder(int,int)));
     connect(this,SIGNAL(approveConnect(QVector<int>,QVector<int>)),server,SLOT(sendApprove(QVector<int>,QVector<int>)));
+    connect(server,SIGNAL(stateChanged(QAbstractSocket::SocketState)),this,SLOT(newState(QAbstractSocket::SocketState)));
 }
 
 void MainWindow::changeOrder(int order,int state){
@@ -50,6 +51,7 @@ void MainWindow::changeOrder(int order,int state){
 void MainWindow::approveConnection(){
     emit approveConnect(this->orders,this->ordersState);
 }
+
 
 
 

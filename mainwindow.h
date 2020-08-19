@@ -47,6 +47,8 @@ private slots:
 
     void on_actionStopServer_triggered();
 
+
+
 private:
     Ui::MainWindow *ui;
     TcpServer *server;

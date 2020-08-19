@@ -23,6 +23,7 @@ void TcpServer::startServer(){
 void TcpServer::stopServer(){
     if(this->isListening()){
         this->close();
+
         emit serverStopped();
     }
 }
@@ -43,14 +44,26 @@ int TcpServer::getPortNumber(){
 
 void TcpServer::readClientCommand(){
     qDebug()<<"Odebrałem ramke";
-    QByteArray data;
+    QByteArray data = "999";
+    qDebug()<<"liczba podlaczonych klientow "<<clientConnection.length();
     for (auto socket:clientConnection){
-        if(socket->isOpen())
+        if(socket->bytesAvailable() > 0){
             data = socket->readAll();
+        }
     }
     QString stringData = data;
     qDebug()<<stringData;
-    emit onOrderOperation(ordNumber(stringData),stateNumber(stringData));
+    if(data == "SOUND")
+        emit makeSoundSignal();
+    else if(data == "RECOVER")
+        emit recoverLastOrder();
+    else if(data == "ADD"){
+        emit addNewOrder();
+    }
+    else
+        emit onOrderOperation(ordNumber(stringData),stateNumber(stringData));
+
+    qDebug()<<data;
 }
 
 
@@ -79,6 +92,7 @@ void TcpServer::sendAllOrders(QVector<int> orders,QVector<int> states){
     block.append(tekst);
     for(auto socket:clientConnection){
         socket->write(block);
+        socket->waitForBytesWritten(1000);
     }
 
     /*block.append(tekst);

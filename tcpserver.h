@@ -47,7 +47,11 @@ public:
 signals:
     void isStartingFailed(bool a);
     void serverStopped();
+
     void onOrderOperation(int order,int state);
+    void makeSoundSignal();
+    void recoverLastOrder();
+    void addNewOrder();
 
 private slots:
     void readClientCommand();
