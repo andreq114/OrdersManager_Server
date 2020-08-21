@@ -17,15 +17,18 @@ DEFINES += QT_DEPRECATED_WARNINGS
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
+    customerswindow.cpp \
     main.cpp \
     mainwindow.cpp \
     tcpserver.cpp
 
 HEADERS += \
+    customerswindow.h \
     mainwindow.h \
     tcpserver.h
 
 FORMS += \
+    customerswindow.ui \
     mainwindow.ui
 
 # Default rules for deployment.

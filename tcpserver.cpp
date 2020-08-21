@@ -67,7 +67,7 @@ void TcpServer::readClientCommand(){
 }
 
 
-void TcpServer::sendApprove(QVector<int> orders,QVector<int> states)  //Po połączeniu wysylamy potwierdzenie o nawiazaniu polaczenia do klienta
+void TcpServer::sendApprove(QVector<int> orders,QVector<int> states,QVector<QString> times,int order)  //Po połączeniu wysylamy potwierdzenie o nawiazaniu polaczenia do klienta
 {
         qDebug()<<"Wysylam cos";
         QString tekst = "$";
@@ -81,13 +81,13 @@ void TcpServer::sendApprove(QVector<int> orders,QVector<int> states)  //Po poł�
 
         clientConnection.last()->write(block);
 
-        sendAllOrders(orders,states);
+        sendAllOrders(orders,states,times,order);
         //clientConnection->disconnectFromHost();
 
 }
 
-void TcpServer::sendAllOrders(QVector<int> orders,QVector<int> states){
-    QString tekst = makeDatagram(orders,states);
+void TcpServer::sendAllOrders(QVector<int> orders,QVector<int> states,QVector<QString> times,int order){
+    QString tekst = makeDatagram(orders,states,times,order);
     QByteArray block;
     block.append(tekst);
     for(auto socket:clientConnection){
@@ -122,9 +122,11 @@ int TcpServer::stateNumber(QString command)     //Wyłuskanie stanu danego zamó
     return state.toInt();
 }
 
-QString TcpServer::makeDatagram(QVector<int> orders,QVector<int> states){
+QString TcpServer::makeDatagram(QVector<int> orders,QVector<int> states,QVector<QString> times,int order){
     QString ordersTemp = "";
     QString statesTemp = "";
+    QString timesTemp = "";
+    QString orderTemp;
 
     for(auto ord:orders){
         ordersTemp.append("*");
@@ -138,6 +140,20 @@ QString TcpServer::makeDatagram(QVector<int> orders,QVector<int> states){
     }
     statesTemp.append("^");
 
-    return ordersTemp+statesTemp;
+    for(auto time:times){
+        timesTemp.append("#");
+        timesTemp.append(time);
+    }
+    timesTemp.append("#");
+
+    orderTemp.append("@");
+    orderTemp.append(QString::number(order+1));
+    orderTemp.append("@");
+
+
+
+    qDebug()<<ordersTemp+statesTemp+timesTemp;
+
+    return ordersTemp+statesTemp+timesTemp+orderTemp;
 
 }

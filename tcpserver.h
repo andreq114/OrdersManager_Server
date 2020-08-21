@@ -10,7 +10,7 @@
 // ORDER/1/STATE/1
 //ORDER - NUMER ZAMÓWIENIA
 //STANY:
-//1 - zamówienia nie ma jeszcze na liście, dodać do listy w trakcie realizacji
+
 //2 - zamówienie jest na którejś liście, dodać do listy częściowo zrealizowanych
 //3 - zamówienie jest na którejś liście, dodać do listy zrealizowanych
 //4 - zamówienie jest na którejś liście, dodać do listy w trakcie realizacji
@@ -37,7 +37,7 @@ public:
 
     void startServer();
     void stopServer();
-    void sendAllOrders(QVector<int> orders,QVector<int> states);
+    void sendAllOrders(QVector<int> orders,QVector<int> states,QVector<QString> times,int order);
 
     void setIpAdress(QString ip);
     void setPortNumber(int port);
@@ -55,7 +55,7 @@ signals:
 
 private slots:
     void readClientCommand();
-    void sendApprove(QVector<int> orders,QVector<int> states);
+    void sendApprove(QVector<int> orders,QVector<int> states,QVector<QString> times,int order);
 
 private:
     QString ipAdr = "172.16.108.177";
@@ -65,7 +65,7 @@ private:
     void connectSignals();
     int ordNumber(QString command);
     int stateNumber(QString command);
-    QString makeDatagram(QVector<int> orders,QVector<int> states);
+    QString makeDatagram(QVector<int> orders,QVector<int> states,QVector<QString> times,int order);
 
 };
 

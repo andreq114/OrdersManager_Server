@@ -13,7 +13,8 @@
 #include <QTableWidgetItem>
 #include <QGridLayout>
 #include <math.h>
-
+#include <QTime>
+#include <customerswindow.h>
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
 QT_END_NAMESPACE
@@ -28,7 +29,7 @@ public:
 
 signals:
     void sendUpdatedOrders(QStringList orders);
-    void approveConnect(QVector<int> orders,QVector<int> states);
+    void approveConnect(QVector<int> orders,QVector<int> states,QVector<QString> times,int ord);
 
 private slots:
     //void sendApprove();
@@ -47,11 +48,15 @@ private slots:
 
     void on_actionStopServer_triggered();
 
+    void addOrderToList();
+
+    void recoverDeletedOrder();
 
 
 private:
     Ui::MainWindow *ui;
     TcpServer *server;
+    CustomersWindow *custWind;
 
     QVector<QString> ordersNotReady;
     QVector<QString> ordersPartReady;
@@ -59,12 +64,22 @@ private:
 
     QVector<int> orders;
     QVector<int> ordersState;
+    QVector<QString> ordersTime;
+    QVector<int> deletedOrders;
+    QVector<int> deletedStates;
+    QVector<QString> deletedTimes;
+
+    QFont ordersFont;
 
     QGridLayout *ordersLayout;
+
+    int order = 0;
 
     //QVector<QTcpSocket*> clientConnection;
     void connectSignals();
     void refreshOrders();
+    void sortOrders();
+
 
     //void readClientCommand();
     //void sendAllOrders();
