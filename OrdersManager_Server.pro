@@ -1,4 +1,4 @@
-QT       += core gui
+QT       += core gui sql
 QT       += network
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
@@ -20,12 +20,14 @@ SOURCES += \
     customerswindow.cpp \
     main.cpp \
     mainwindow.cpp \
-    tcpserver.cpp
+    tcpserver.cpp \
+    thread.cpp
 
 HEADERS += \
     customerswindow.h \
     mainwindow.h \
-    tcpserver.h
+    tcpserver.h \
+    thread.h
 
 FORMS += \
     customerswindow.ui \

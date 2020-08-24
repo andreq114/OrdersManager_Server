@@ -15,6 +15,10 @@
 #include <math.h>
 #include <QTime>
 #include <customerswindow.h>
+
+#include <QtSql>
+#include <QtDebug>
+#include <QFileInfo>
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
 QT_END_NAMESPACE
@@ -53,6 +57,8 @@ private slots:
     void recoverDeletedOrder();
 
 
+    void on_actionFull_screen_triggered();
+
 private:
     Ui::MainWindow *ui;
     TcpServer *server;
@@ -68,6 +74,7 @@ private:
     QVector<int> deletedOrders;
     QVector<int> deletedStates;
     QVector<QString> deletedTimes;
+
 
     QFont ordersFont;
 

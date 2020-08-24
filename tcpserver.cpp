@@ -23,7 +23,8 @@ void TcpServer::startServer(){
 void TcpServer::stopServer(){
     if(this->isListening()){
         this->close();
-
+        for(auto client:clientConnection)
+            client->disconnectFromHost();
         emit serverStopped();
     }
 }
@@ -59,6 +60,9 @@ void TcpServer::readClientCommand(){
         emit recoverLastOrder();
     else if(data == "ADD"){
         emit addNewOrder();
+    }
+    else if(data == "FULLSCREEN"){
+        emit serverFullScreen();
     }
     else
         emit onOrderOperation(ordNumber(stringData),stateNumber(stringData));

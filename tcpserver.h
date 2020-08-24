@@ -52,6 +52,7 @@ signals:
     void makeSoundSignal();
     void recoverLastOrder();
     void addNewOrder();
+    void serverFullScreen();
 
 private slots:
     void readClientCommand();

@@ -116,6 +116,7 @@
     </property>
     <addaction name="actionStartServer"/>
     <addaction name="actionStopServer"/>
+    <addaction name="actionFull_screen"/>
     <addaction name="actionKonfiguracja"/>
     <addaction name="separator"/>
     <addaction name="actionInformacje"/>
@@ -141,6 +142,11 @@
   <action name="actionStopServer">
    <property name="text">
     <string>Rozłącz serwer</string>
+   </property>
+  </action>
+  <action name="actionFull_screen">
+   <property name="text">
+    <string>Pełny ekran</string>
    </property>
   </action>
  </widget>

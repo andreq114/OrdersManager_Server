@@ -16,6 +16,9 @@ MainWindow::MainWindow(QWidget *parent)
 
     ordersFont.setBold(true);
     ordersFont.setPointSize(20);
+
+
+    QSqlDatabase database = QSqlDatabase::addDatabase("database");
 }
 
 MainWindow::~MainWindow()
@@ -35,6 +38,10 @@ void MainWindow::connectSignals(){
     connect(server,SIGNAL(recoverLastOrder()),this,SLOT(recoverDeletedOrder()));
 
     connect(this,SIGNAL(approveConnect(QVector<int>,QVector<int>,QVector<QString>,int)),server,SLOT(sendApprove(QVector<int>,QVector<int>,QVector<QString>,int)));
+
+    connect(server,SIGNAL(serverFullScreen()),this,SLOT(on_actionFull_screen_triggered()));
+
+
 
 }
 
@@ -126,35 +133,38 @@ void MainWindow::serverStopped(){
 
 void MainWindow::on_actionKonfiguracja_triggered() //Okienko do zmiany adresu ip i portu serwera
 {
-    QDialog dialog(this);
-    QFormLayout lay(&dialog);
+    if(server->isListening()){
+        QMessageBox::information(this,"Blad","Pierw zatrzymaj serwer");
+    }else{
+        QDialog dialog(this);
+        QFormLayout lay(&dialog);
 
-    lay.addRow(new QLabel("Adres IP serwera:"));
-    QLineEdit *ipAdress = new QLineEdit (&dialog);
-    ipAdress->setInputMask("000.000.000.000;_");
-    lay.addRow (ipAdress);
+        lay.addRow(new QLabel("Adres IP serwera:"));
+        QLineEdit *ipAdress = new QLineEdit (&dialog);
+        ipAdress->setInputMask("000.000.000.000;_");
+        lay.addRow (ipAdress);
 
-    lay.addRow(new QLabel("Port serwera:"));
-    QLineEdit *portNumber = new QLineEdit (&dialog);
-    portNumber->setInputMask("00000;_");
-    lay.addRow(portNumber);
+        lay.addRow(new QLabel("Port serwera:"));
+        QLineEdit *portNumber = new QLineEdit (&dialog);
+        portNumber->setInputMask("00000;_");
+        lay.addRow(portNumber);
 
-    // Dodaj przycisk Anuluj i OK
-    QDialogButtonBox buttonBox (QDialogButtonBox :: Ok | QDialogButtonBox :: Cancel                                ,
-                                Qt :: Horizontal, & dialog);
-    lay.addRow ( & buttonBox);
-    QObject :: connect ( & buttonBox, SIGNAL (rejected ()), & dialog, SLOT (reject ()));
-    QObject :: connect ( & buttonBox, SIGNAL (accepted ()), & dialog, SLOT (accept ()));
-    if (dialog.exec() == QDialog::Accepted) {
+        // Dodaj przycisk Anuluj i OK
+        QDialogButtonBox buttonBox (QDialogButtonBox :: Ok | QDialogButtonBox :: Cancel                                ,
+                                    Qt :: Horizontal, & dialog);
+        lay.addRow ( & buttonBox);
+        QObject :: connect ( & buttonBox, SIGNAL (rejected ()), & dialog, SLOT (reject ()));
+        QObject :: connect ( & buttonBox, SIGNAL (accepted ()), & dialog, SLOT (accept ()));
+        if (dialog.exec() == QDialog::Accepted) {
 
-        server->setIpAdress(ipAdress->text());
+            server->setIpAdress(ipAdress->text());
 
-        if(portNumber->text().isEmpty())
-            server->setPortNumber(0);
-        else
-            server->setPortNumber(portNumber->text().toInt());
+            if(portNumber->text().isEmpty())
+                server->setPortNumber(0);
+            else
+                server->setPortNumber(portNumber->text().toInt());
+        }
     }
-
 }
 
 
@@ -269,6 +279,7 @@ void MainWindow::refreshOrders(){
 
 
     }
+    custWind->refreshOrdersTables(orders,ordersState);
 
 
 
@@ -278,4 +289,9 @@ void MainWindow::refreshOrders(){
 
 
 
+}
+
+void MainWindow::on_actionFull_screen_triggered()
+{
+    custWind->setFullScreen();
 }
