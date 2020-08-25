@@ -18,6 +18,7 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 SOURCES += \
     customerswindow.cpp \
+    dbmanager.cpp \
     main.cpp \
     mainwindow.cpp \
     tcpserver.cpp \
@@ -25,6 +26,7 @@ SOURCES += \
 
 HEADERS += \
     customerswindow.h \
+    dbmanager.h \
     mainwindow.h \
     tcpserver.h \
     thread.h

@@ -16,9 +16,8 @@
 #include <QTime>
 #include <customerswindow.h>
 
-#include <QtSql>
-#include <QtDebug>
-#include <QFileInfo>
+
+#include <dbmanager.h>
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
 QT_END_NAMESPACE
@@ -63,6 +62,7 @@ private:
     Ui::MainWindow *ui;
     TcpServer *server;
     CustomersWindow *custWind;
+    dbManager *db;
 
     QVector<QString> ordersNotReady;
     QVector<QString> ordersPartReady;
@@ -76,6 +76,8 @@ private:
     QVector<QString> deletedTimes;
 
 
+
+
     QFont ordersFont;
 
     QGridLayout *ordersLayout;
@@ -86,6 +88,8 @@ private:
     void connectSignals();
     void refreshOrders();
     void sortOrders();
+    void loadSettingsFromDB();
+
 
 
     //void readClientCommand();

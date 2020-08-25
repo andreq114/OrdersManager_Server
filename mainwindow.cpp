@@ -17,13 +17,20 @@ MainWindow::MainWindow(QWidget *parent)
     ordersFont.setBold(true);
     ordersFont.setPointSize(20);
 
+    db = new dbManager(this);
 
-    QSqlDatabase database = QSqlDatabase::addDatabase("database");
+
+    loadSettingsFromDB();
+
+
 }
 
 MainWindow::~MainWindow()
 {
     delete ui;
+    delete db;
+    delete server;
+    delete custWind;
 }
 
 
@@ -61,15 +68,18 @@ void MainWindow::changeOrder(int order,int state){
                 orders.removeAt(i);
                 ordersState.removeAt(i);
                 ordersTime.removeAt(i);
+
+                db->deleteOrder_fromDb(order);
             }else{
                 ordersState.removeAt(i);
                 ordersState.insert(i,state);
+                db->updateOrder_inDb(order,state);
             }
         }
     }
 
 
-    server->sendAllOrders(orders,ordersState,ordersTime,order);
+    server->sendAllOrders(orders,ordersState,ordersTime,db->getNextNumber_fromDb());
     refreshOrders();
 
 
@@ -86,6 +96,9 @@ void MainWindow::addOrderToList(){
     orders.append(order);
     ordersState.append(1);
     ordersTime.append(QTime::currentTime().toString("hh:mm:ss"));
+    db->addOrder_toDb(order,1,QTime::currentTime().toString("hh:mm:ss"));
+    db->saveNextNumber_toDb(order);
+
     qDebug()<<"Przed refreshem";
     refreshOrders();
     qDebug()<<"Po refreshu";
@@ -159,11 +172,18 @@ void MainWindow::on_actionKonfiguracja_triggered() //Okienko do zmiany adresu ip
 
             server->setIpAdress(ipAdress->text());
 
+
             if(portNumber->text().isEmpty())
                 server->setPortNumber(0);
             else
                 server->setPortNumber(portNumber->text().toInt());
+
+            db->addIp_port_toDb(server->getIpAdress(),server->getPortNumber());
         }
+
+
+
+
     }
 }
 
@@ -283,15 +303,33 @@ void MainWindow::refreshOrders(){
 
 
 
-
-
-
-
-
-
 }
 
 void MainWindow::on_actionFull_screen_triggered()
 {
     custWind->setFullScreen();
+}
+
+void MainWindow::loadSettingsFromDB(){
+
+    server->setIpAdress(db->readIp_fromDb());
+    server->setPortNumber(db->readPort_fromDb());
+    order = db->getNextNumber_fromDb();
+    qDebug()<<"Ostatnie zamowienie z bazy "<<order;
+    qDebug()<<"Dlugosc listy zamowien przed: "<<orders.length();
+    qDebug()<<"Dlugosc listy stanow przed: "<<ordersState.length();
+    qDebug()<<"Dlugosc listy czasow przed: "<<ordersTime.length();
+
+    for(int i=0;i<db->getTimes_fromDb().length();i++){
+        orders.append(db->getOrders_fromDb().at(i));
+        ordersState.append(db->getStates_fromDb().at(i));
+        ordersTime.append(db->getTimes_fromDb().at(i));
+    }
+    qDebug()<<"Dlugosc listy zamowien po: "<<orders.length();
+    qDebug()<<"Dlugosc listy stanow po: "<<ordersState.length();
+    qDebug()<<"Dlugosc listy czasow po: "<<ordersTime.length();
+
+    refreshOrders();
+
+
 }

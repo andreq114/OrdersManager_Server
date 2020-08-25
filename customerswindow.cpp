@@ -134,7 +134,7 @@ void CustomersWindow::splitOrders(QVector<int> orders,QVector<int> states){
 
 
 void CustomersWindow::showNext(){
-    qDebug()<<"Druga strona";
+
 
     delete ordersWidget;
     ordersWidget = new QTableWidget();
