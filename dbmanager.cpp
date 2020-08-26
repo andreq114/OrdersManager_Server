@@ -12,17 +12,20 @@ void dbManager::startDatabase(){
 
     db = QSqlDatabase::addDatabase(DRIVER,"database");
 
-    db.setDatabaseName("F:/OrdersManager_Server/OrdersManager_Server/myDB");
+    const QString applicationFolder = QStandardPaths::writableLocation(QStandardPaths::ApplicationsLocation);
+    db.setDatabaseName(applicationFolder+"/database.sqllite");
 
 
     if(!db.open())
         qWarning() << "ERROR: " << db.lastError();
     query = new QSqlQuery(db);
 
-    //Tabele juz stworzone, komentujemy
-    //query->exec("CREATE TABLE orders (id INTEGER PRIMARY KEY, orderNumber INTEGER, orderState INTEGER,orderTime VARCHAR(10))");
 
-    // query->exec("CREATE TABLE config (id INTEGER PRIMARy KEY, ipAdress VARCHAR(20), port INTEGER)");
+    query->exec("CREATE TABLE IF NOT EXISTS orders (id INTEGER PRIMARY KEY, orderNumber INTEGER, orderState INTEGER,orderTime VARCHAR(10))");
+
+    query->exec("CREATE TABLE IF NOT EXISTS config (id INTEGER PRIMARY KEY, ipAdress VARCHAR(20), port INTEGER)");
+
+    query->exec("CREATE TABLE IF NOT EXISTS next_number (id INTEGER PRIMARY KEY, nextNumber INTEGER)");
 
     if(!query->isActive())
         qWarning() << "ERROR: " << query->lastError().text();
@@ -32,20 +35,42 @@ void dbManager::startDatabase(){
 
 bool dbManager::addIp_port_toDb(QString ip,int port){
 
-    query->prepare("UPDATE config SET ipAdress = :ip WHERE id = 1");
-    query->bindValue(":ip", ip);
+    //Sprawdzamy czy tabela ip/portu jest pusta, wykonywane przy pierwszym uzyciu programu
+    query->prepare("SELECT COUNT(*) FROM config");
     if(!query -> exec())
         qWarning() << "ERROR: " << query->lastError().text();
+    int rowsInTable = 0;
+    if (query->next()) {
+        rowsInTable= query->value(0).toInt();
+    }
     query->clear();
 
 
+    //Wkladamy nowy wiersz do tabeli bazy danych z ip i portem
+    if(rowsInTable == 0){
+        query->prepare("INSERT INTO config(ipAdress,port) VALUES(?,?)");
+        query->addBindValue(ip);
+        query->addBindValue(port);
+        if(!query -> exec())
+            qWarning() << "ERROR: " << query->lastError().text();
+        query->clear();
+    }else{
+        //Przy kazdym kolejnym zaktualizowaniu tabeli ip/portu
 
-    query->prepare("UPDATE config SET port = :por WHERE id = 1");
-    query->bindValue(":por", port);
-    if(!query -> exec())
-        qWarning() << "ERROR: " << query->lastError().text();
-    query->clear();
+        query->prepare("UPDATE config SET ipAdress = :ip WHERE id = 1");
+        query->bindValue(":ip", ip);
+        if(!query -> exec())
+            qWarning() << "ERROR: " << query->lastError().text();
+        query->clear();
 
+
+        query->prepare("UPDATE config SET port = :por WHERE id = 1");
+        query->bindValue(":por", port);
+        if(!query -> exec())
+            qWarning() << "ERROR: " << query->lastError().text();
+        query->clear();
+
+    }
     return true;
 }
 
@@ -108,11 +133,32 @@ void dbManager::updateOrder_inDb(int order, int state){
 
 
 void dbManager::saveNextNumber_toDb(int number){
-    query->prepare("UPDATE next_number SET nextNumber = :number");
-    query->bindValue(":number", number);
+    //Sprawdzamy czy tabela next_number jest pusta, wykonywane przy pierwszym uzyciu programu
+    query->prepare("SELECT COUNT(*) FROM next_number");
     if(!query -> exec())
         qWarning() << "ERROR: " << query->lastError().text();
+    int rowsInTable = 0;
+    if (query->next()) {
+        rowsInTable= query->value(0).toInt();
+    }
     query->clear();
+    qDebug()<<"Liczba wierszy w tabeli nastepnego zamowienia "<<rowsInTable;
+
+    if(rowsInTable == 0){
+        query->prepare("INSERT INTO next_number(nextNumber) VALUES(?)");
+        query->addBindValue(number);
+        if(!query -> exec())
+            qWarning() << "ERROR: " << query->lastError().text();
+        query->clear();
+    }else{
+
+
+        query->prepare("UPDATE next_number SET nextNumber = :number");
+        query->bindValue(":number", number);
+        if(!query -> exec())
+            qWarning() << "ERROR: " << query->lastError().text();
+        query->clear();
+    }
 }
 
 int dbManager::getNextNumber_fromDb(){

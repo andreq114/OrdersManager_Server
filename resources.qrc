@@ -1,0 +1,6 @@
+<RCC>
+    <qresource prefix="/new/images">
+        <file>img/sound_icon.png</file>
+    </qresource>
+    <qresource prefix="/database"/>
+</RCC>

@@ -53,10 +53,12 @@ signals:
     void recoverLastOrder();
     void addNewOrder();
     void serverFullScreen();
+    void resetOrders();
 
 private slots:
     void readClientCommand();
     void sendApprove(QVector<int> orders,QVector<int> states,QVector<QString> times,int order);
+    void disconnectClient();
 
 private:
     QString ipAdr = "172.16.108.177";

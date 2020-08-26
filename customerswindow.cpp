@@ -52,11 +52,11 @@ void CustomersWindow::startPreferences(){
 
 
     titleFont.setBold(true);
-    titleFont.setPointSize(40);
+    titleFont.setPointSize(74);
     descrFont.setBold(true);
-    descrFont.setPointSize(35);
+    descrFont.setPointSize(60);
     ordersFont.setBold(true);
-    ordersFont.setPointSize(50);
+    ordersFont.setPointSize(200);
 
     ordersWidget = new QTableWidget();
     ordersWidget->setStyleSheet("background-color:transparent;");
@@ -191,12 +191,13 @@ void CustomersWindow::dispTable(int a,int b){
     }else{
         b_temp = b;
     }
-
     ordersWidget->setRowCount(b_temp-a);
     ordersWidget->setColumnCount(2);
+    qDebug()<<"Wysokosc glownego okna ";
     for(int i=a;i<b_temp;i++){
-        ordersWidget->setRowHeight(i-a,175);
-        qDebug()<<"Wykonuje sie";
+        ordersWidget->setRowHeight(i-a,350);
+
+
         ordItem = new QTableWidgetItem();
         descItem = new QTableWidgetItem();
 

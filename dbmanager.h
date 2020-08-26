@@ -6,6 +6,7 @@
 #include <QSqlDriver>
 #include <QSqlError>
 #include <QSqlQuery>
+#include <QStandardPaths>
 
 #include <QDebug>
 

@@ -47,6 +47,7 @@ void MainWindow::connectSignals(){
     connect(this,SIGNAL(approveConnect(QVector<int>,QVector<int>,QVector<QString>,int)),server,SLOT(sendApprove(QVector<int>,QVector<int>,QVector<QString>,int)));
 
     connect(server,SIGNAL(serverFullScreen()),this,SLOT(on_actionFull_screen_triggered()));
+    connect(server,SIGNAL(resetOrders()),this,SLOT(ordersReset()));
 
 
 
@@ -116,6 +117,8 @@ void MainWindow::recoverDeletedOrder(){
         ordersTime.append(deletedTimes.last());
         deletedTimes.removeLast();
 
+        db->addOrder_toDb(orders.last(),ordersState.last(),ordersTime.last());
+
         sortOrders();
         refreshOrders();
         server->sendAllOrders(orders,ordersState,ordersTime,order);
@@ -125,6 +128,7 @@ void MainWindow::recoverDeletedOrder(){
 
 
 void MainWindow::approveConnection(){
+    qDebug()<<"Nowe polaczenie, emituje sygnał";
     emit approveConnect(this->orders,this->ordersState,this->ordersTime,this->order);
 }
 
@@ -262,11 +266,12 @@ void MainWindow::sortOrders(){
 }
 
 void MainWindow::refreshOrders(){
+    qDebug()<<"Poczatek refresha";
     QStringList ordList;
     int row = 0;
     int col = 0;
     QTableWidgetItem *ordItem;
-
+    qDebug()<<orders.length();
     for(int i=0;i<orders.length();i++){
         ordList.append(QString::number(orders.at(i)));
     }
@@ -328,8 +333,26 @@ void MainWindow::loadSettingsFromDB(){
     qDebug()<<"Dlugosc listy zamowien po: "<<orders.length();
     qDebug()<<"Dlugosc listy stanow po: "<<ordersState.length();
     qDebug()<<"Dlugosc listy czasow po: "<<ordersTime.length();
-
+    sortOrders();
     refreshOrders();
 
 
+}
+
+void MainWindow::ordersReset(){
+    for(auto ord:orders){
+        db->deleteOrder_fromDb(ord);
+    }
+    orders.clear();
+    ordersState.clear();
+    ordersTime.clear();
+
+    deletedOrders.clear();
+    deletedTimes.clear();
+    deletedStates.clear();
+
+    db->saveNextNumber_toDb(1);
+    order = 0;
+    refreshOrders();
+    server->sendAllOrders(orders,ordersState,ordersTime,order);
 }

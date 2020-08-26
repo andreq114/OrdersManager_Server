@@ -64,6 +64,9 @@ void TcpServer::readClientCommand(){
     else if(data == "FULLSCREEN"){
         emit serverFullScreen();
     }
+    else if(data == "RESET"){
+        emit resetOrders();
+    }
     else
         emit onOrderOperation(ordNumber(stringData),stateNumber(stringData));
 
@@ -79,9 +82,10 @@ void TcpServer::sendApprove(QVector<int> orders,QVector<int> states,QVector<QStr
         block.append(tekst);
 
         qDebug()<<block;
-        clientConnection .append(this->nextPendingConnection());
+        clientConnection.append(this->nextPendingConnection());
         //connect(clientConnection.la, &QAbstractSocket::disconnected,clientConnection, &QObject::deleteLater);
         connect(clientConnection.last(), &QIODevice::readyRead, this, &TcpServer::readClientCommand);
+        connect(clientConnection.last(),SIGNAL(disconnected()),this,SLOT(disconnectClient()));
 
         clientConnection.last()->write(block);
 
@@ -151,7 +155,10 @@ QString TcpServer::makeDatagram(QVector<int> orders,QVector<int> states,QVector<
     timesTemp.append("#");
 
     orderTemp.append("@");
-    orderTemp.append(QString::number(order+1));
+    if(order == 99)
+        orderTemp.append(QString::number(1));
+    else
+        orderTemp.append(QString::number(order+1));
     orderTemp.append("@");
 
 
@@ -160,4 +167,17 @@ QString TcpServer::makeDatagram(QVector<int> orders,QVector<int> states,QVector<
 
     return ordersTemp+statesTemp+timesTemp+orderTemp;
 
+}
+
+
+void TcpServer::disconnectClient(){
+    qDebug()<<"Rozlaczam klienta";
+    qDebug()<<sender();
+    for(auto sock:clientConnection)
+        if(sender() == sock)
+            clientConnection.removeOne(sock);
+
+    disconnect(sender(),SIGNAL(disconnected()),this,SLOT(disconnectClient()));
+    sender()->deleteLater();
+    qDebug()<<sender();
 }

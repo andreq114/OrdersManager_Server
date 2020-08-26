@@ -17,6 +17,7 @@
 #include <customerswindow.h>
 
 
+
 #include <dbmanager.h>
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -57,6 +58,8 @@ private slots:
 
 
     void on_actionFull_screen_triggered();
+
+    void ordersReset();
 
 private:
     Ui::MainWindow *ui;
