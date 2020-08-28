@@ -23,46 +23,48 @@ class CustomersWindow : public QMainWindow
 public:
     explicit CustomersWindow(QWidget *parent = nullptr);
     ~CustomersWindow();
-    void refreshOrdersTables(QVector<int> orders,QVector<int> states);
-    void setFullScreen();
+    void refreshOrdersTables(QVector<int> orders,QVector<int> states);          //Odwiezenie listy zamowień
+    void setFullScreen();                                                       //Ustawianie trybu pelnego ekranu dla tego okna
 
 public slots:
-    void showNext();
+    void showNext();                                                            //Jesli zamowien jest wiecej niz 5, przeskakiwanie miedzy ekranami
 
 private:
     Ui::CustomersWindow *ui;
-    QHBoxLayout *titleLay;
+    QHBoxLayout *titleLay;                                                      //Layouty do rozmieszcenia gui
     QHBoxLayout *tabWidgLay;
     QVBoxLayout *centralLayout;
     QVBoxLayout *tabWidgLay2;
 
     Thread *myThread;
 
-    QLabel *titleLabel;
+    QLabel *titleLabel;                                                         //Label z napisem "Zamówienia"
 
-    QFont titleFont;
+    QFont titleFont;                                                            //Czcionki dla tytułu,numerów zamówień i opisu zamówień
     QFont ordersFont;
     QFont descrFont;
 
-    QTableWidget *ordersWidget;
-    QTableWidgetItem *ordItem;
-    QTableWidgetItem *descItem;
+    QTableWidget *ordersWidget;                                                 //Główny widget dla zamówień w którym są wyświetlane zamówienia
+    QTableWidgetItem *ordItem;                                                  //Itemy z numerem zamówień
+    QTableWidgetItem *descItem;                                                 //Itemy z opisem danego zamówienia
 
-    QVector<int> fullReadyOrders;
+    QVector<int> fullReadyOrders;                                               //Wektory z zamówieniami podzielone na zrealizowane,czesciowo zreazlizowane i w trakcie realizacji
     QVector<int> partReadyOrders;
     QVector<int> notReadyOrders;
-    QVector<int> allOrders;
+
+    QVector<int> allOrders;                                                     //Listy wszystkich zamówień i stanów
     QVector<int> allStates;
-    int actualOrdersPage = 1;
-    int maxOrdersPage = 1;
 
-    void startPreferences();
+    int actualOrdersPage = 1;                                                   //Aktualna strona z zamówieniami
+    int maxOrdersPage = 1;                                                      //Liczba wszystkich stron z zamówieniami
 
-    void connectSignals();
+    void startPreferences();                                                    //Początkowe ustawienia okna (rysowanie gui)
 
-    void splitOrders(QVector<int> orders,QVector<int> states);
+    void connectSignals();                                                      //Polaczenie sygnałow ze slotami
 
-    void dispTable(int a,int b);
+    void splitOrders(QVector<int> orders,QVector<int> states);                  //Podział zamówień na osobne listy zrealizowanych/czesciowo zrealizowanych/w trakcie realizacji
+
+    void dispTable(int a,int b);                                                //Wyswietlanie tabeli na ekranie
 
 
 };

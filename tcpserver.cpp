@@ -2,15 +2,12 @@
 
 TcpServer::TcpServer(QObject *parent) : QTcpServer(parent)
 {
-    connectSignals();
 }
 
 TcpServer::~TcpServer()
 {
-
-}
-void TcpServer::connectSignals(){
-        //connect(this, &QTcpServer::newConnection, this, &TcpServer::sendApprove);
+    for(auto client:clientConnection)
+        delete client;
 }
 void TcpServer::startServer(){
     if (!this->listen(QHostAddress(ipAdr),port)) {
@@ -70,31 +67,29 @@ void TcpServer::readClientCommand(){
     else
         emit onOrderOperation(ordNumber(stringData),stateNumber(stringData));
 
-    qDebug()<<data;
 }
-
 
 void TcpServer::sendApprove(QVector<int> orders,QVector<int> states,QVector<QString> times,int order)  //Po połączeniu wysylamy potwierdzenie o nawiazaniu polaczenia do klienta
 {
         qDebug()<<"Wysylam cos";
+        //Pierwsze polaczenie, dodajemy dolara na poczatku łańcucha znaków przed listami zamówień itd.
         QString tekst = "$";
         QByteArray block;
         block.append(tekst);
 
-        qDebug()<<block;
-        clientConnection.append(this->nextPendingConnection());
-        //connect(clientConnection.la, &QAbstractSocket::disconnected,clientConnection, &QObject::deleteLater);
-        connect(clientConnection.last(), &QIODevice::readyRead, this, &TcpServer::readClientCommand);
-        connect(clientConnection.last(),SIGNAL(disconnected()),this,SLOT(disconnectClient()));
+        clientConnection.append(this->nextPendingConnection());                                             //Dodajemy ostatnio podlaczonego klienta do listy
+        connect(clientConnection.last(), &QIODevice::readyRead, this, &TcpServer::readClientCommand);       //Polaczenie sygnalu otrzymania danych od klienta ze slotem
+        connect(clientConnection.last(),SIGNAL(disconnected()),this,SLOT(disconnectClient()));              //Polaczenie sygnalu rozlaczenie klienta ze slotem
 
-        clientConnection.last()->write(block);
+        clientConnection.last()->write(block);                  //Dodajemy dolara do bloku ostatnio polaczonego klienta
 
-        sendAllOrders(orders,states,times,order);
-        //clientConnection->disconnectFromHost();
+        sendAllOrders(orders,states,times,order);               //Wysyłamy aktualna liste zamówień do wszystkich klientów
+
 
 }
 
 void TcpServer::sendAllOrders(QVector<int> orders,QVector<int> states,QVector<QString> times,int order){
+    //Tworzymy lancuch znakow z zamowien,stanow,czasow oraz nastepnego numeru zamowienia i wysyłamy do wszystkich podłączonych klientów
     QString tekst = makeDatagram(orders,states,times,order);
     QByteArray block;
     block.append(tekst);
@@ -103,30 +98,24 @@ void TcpServer::sendAllOrders(QVector<int> orders,QVector<int> states,QVector<QS
         socket->waitForBytesWritten(1000);
     }
 
-    /*block.append(tekst);
-    clientConnection = server->nextPendingConnection();
-    connect(clientConnection, &QAbstractSocket::disconnected,clientConnection, &QObject::deleteLater);
-
-    clientConnection->write(block);*/
-    //clientConnection->disconnectFromHost();
 }
 
 
 
 
-int TcpServer::ordNumber(QString command)       //Wyłuskanie numeru zamówienia
+int TcpServer::ordNumber(QString command)
 {
+    //Wyłuskanie numeru zamówienia
     QString ord;
     ord = command.mid(command.indexOf("/")+1,command.lastIndexOf("/")-command.indexOf("/")-1);
-    qDebug()<<"Zamowienie"<<ord;
     return ord.toInt();
 }
 
-int TcpServer::stateNumber(QString command)     //Wyłuskanie stanu danego zamówienia
+int TcpServer::stateNumber(QString command)
 {
+    //Wyłuskanie stanu danego zamówienia
     QString state;
     state = command.mid(command.indexOf("#")+1,command.lastIndexOf("#")-command.indexOf("#")-1);
-    qDebug()<<"Stan"<<state;
     return state.toInt();
 }
 
@@ -171,13 +160,12 @@ QString TcpServer::makeDatagram(QVector<int> orders,QVector<int> states,QVector<
 
 
 void TcpServer::disconnectClient(){
-    qDebug()<<"Rozlaczam klienta";
-    qDebug()<<sender();
+
     for(auto sock:clientConnection)
         if(sender() == sock)
             clientConnection.removeOne(sock);
 
     disconnect(sender(),SIGNAL(disconnected()),this,SLOT(disconnectClient()));
     sender()->deleteLater();
-    qDebug()<<sender();
+
 }

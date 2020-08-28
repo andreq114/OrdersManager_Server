@@ -6,11 +6,15 @@ MainWindow::MainWindow(QWidget *parent)
     , ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
+
     server = new TcpServer(this);
+
     custWind = new CustomersWindow(this);
     custWind->show();
     custWind->refreshOrdersTables(orders,ordersState);
+
     connectSignals();
+
     ui->ordersTable->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
     ui->ordersTable->verticalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
 
@@ -18,9 +22,9 @@ MainWindow::MainWindow(QWidget *parent)
     ordersFont.setPointSize(20);
 
     db = new dbManager(this);
-
-
     loadSettingsFromDB();
+
+    bell = new QSound(":/sound/bell.wav");
 
 
 }
@@ -31,13 +35,15 @@ MainWindow::~MainWindow()
     delete db;
     delete server;
     delete custWind;
+    delete ordersLayout;
+    delete bell;
 }
 
 
 void MainWindow::connectSignals(){
     connect(server,SIGNAL(isStartingFailed(bool)),this,SLOT(serverStartingFailed(bool)));
     connect(server, SIGNAL(newConnection()), this, SLOT(approveConnection()));
-    //connect(clientConnection, &QIODevice::readyRead, this, &MainWindow::sendAllOrders); NIE ODKOMENTOWAC
+
     connect(server,SIGNAL(serverStopped()),this,SLOT(serverStopped()));
 
     connect(server,SIGNAL(onOrderOperation(int,int)),this,SLOT(changeOrder(int,int)));
@@ -49,6 +55,8 @@ void MainWindow::connectSignals(){
     connect(server,SIGNAL(serverFullScreen()),this,SLOT(on_actionFull_screen_triggered()));
     connect(server,SIGNAL(resetOrders()),this,SLOT(ordersReset()));
 
+    connect(server,SIGNAL(makeSoundSignal()),this,SLOT(soundSignal()));
+
 
 
 }
@@ -56,8 +64,9 @@ void MainWindow::connectSignals(){
 void MainWindow::changeOrder(int order,int state){
 
     //TU SIE WYKONUJE PROCEDURA OPERACJI NA LISTACH ZAMOWIEN ( ZMIANA , USUNIECIE)
-    qDebug()<<"NUMER ZAMOWIENIA TO"<<order;
-    qDebug()<<"STAN ZAMOWIENIA TO"<<state;
+
+    if(state == 2 || state == 3)
+        soundSignal();
 
     for(int i=0;i<orders.length();i++){
         if(orders.at(i) == order){
@@ -100,13 +109,13 @@ void MainWindow::addOrderToList(){
     db->addOrder_toDb(order,1,QTime::currentTime().toString("hh:mm:ss"));
     db->saveNextNumber_toDb(order);
 
-    qDebug()<<"Przed refreshem";
     refreshOrders();
-    qDebug()<<"Po refreshu";
+
     server->sendAllOrders(orders,ordersState,ordersTime,order);
 }
 
 void MainWindow::recoverDeletedOrder(){
+    //Jeśli lista usunietych nie jest pusta
     if(!deletedOrders.isEmpty()){
         orders.append(deletedOrders.last());
         deletedOrders.removeLast();
@@ -128,32 +137,34 @@ void MainWindow::recoverDeletedOrder(){
 
 
 void MainWindow::approveConnection(){
-    qDebug()<<"Nowe polaczenie, emituje sygnał";
+
     emit approveConnect(this->orders,this->ordersState,this->ordersTime,this->order);
 }
 
 void MainWindow::serverStartingFailed(bool a){
     if(a == true){
         QMessageBox::information(this, tr("Orders System Server"),
-                          tr("Unable to start the server: %1.")
+                          tr("Nie można uruchomić serwera: %1.")
                           .arg(server->errorString()));
     }else{
         QMessageBox::information(this, tr("Orders System Server"),
-                          tr("The server was created successfully"));
+                          tr("Serwer został pomyślnie uruchomiony."));
 
     }
 }
 
 void MainWindow::serverStopped(){
-    QMessageBox::information(this,"Informacja","Server został zatrzymany",QMessageBox::Ok);
+    QMessageBox::information(this,"Informacja","Serwer został zatrzymany.",QMessageBox::Ok);
 }
 
 void MainWindow::on_actionKonfiguracja_triggered() //Okienko do zmiany adresu ip i portu serwera
 {
     if(server->isListening()){
-        QMessageBox::information(this,"Blad","Pierw zatrzymaj serwer");
+        QMessageBox::information(this,"Blad","Serwer musi zostać najpierw zatrzymany.");
     }else{
         QDialog dialog(this);
+        dialog.setMinimumSize(200,170);
+        dialog.setMaximumSize(200,170);
         QFormLayout lay(&dialog);
 
         lay.addRow(new QLabel("Adres IP serwera:"));
@@ -174,7 +185,7 @@ void MainWindow::on_actionKonfiguracja_triggered() //Okienko do zmiany adresu ip
         QObject :: connect ( & buttonBox, SIGNAL (accepted ()), & dialog, SLOT (accept ()));
         if (dialog.exec() == QDialog::Accepted) {
 
-            server->setIpAdress(ipAdress->text());
+                server->setIpAdress(ipAdress->text());
 
 
             if(portNumber->text().isEmpty())
@@ -196,6 +207,8 @@ void MainWindow::on_actionInformacje_triggered()
 {
     QDialog dialog(this);
     QFormLayout lay(&dialog);
+    dialog.setMinimumSize(200,170);
+    dialog.setMaximumSize(200,150);
 
     lay.addRow(new QLabel("Adres IP serwera:"));
     lay.addRow (new QLabel(server->getIpAdress()));
@@ -219,28 +232,26 @@ void MainWindow::on_actionStartServer_triggered()
     else
         server->startServer();
 
-    qDebug()<<"IP serwera: "<<server->serverAddress().toString();
-    qDebug()<<"\nPort serwera: "<<server->serverPort();
 }
 
 void MainWindow::on_actionStopServer_triggered()
 {
     if(!server->isListening())
-        QMessageBox::information(this,"Błąd","Serwer jestj już zatrzymany");
+        QMessageBox::information(this,"Błąd","Serwer nie jest uruchomiony.");
     else
         server->stopServer();
 }
 
 void MainWindow::sortOrders(){
+
+    //Bubble sort na wszystkich 3 listach opierajac sie na liscie z zamowieniami
     bool change = true;
     int tempOrd = 0;
     int tempState = 0;
     QString tempTime = "";
-    qDebug()<<"Dlugosc ordersów "<<orders.length();
     while(change){
         change = false;
         for(int i=0;i<orders.length()-1;i++){
-            qDebug()<<i;
             if(orders.at(i+1) < orders.at(i)){
                 change = true;
 
@@ -266,12 +277,12 @@ void MainWindow::sortOrders(){
 }
 
 void MainWindow::refreshOrders(){
-    qDebug()<<"Poczatek refresha";
+
     QStringList ordList;
     int row = 0;
     int col = 0;
     QTableWidgetItem *ordItem;
-    qDebug()<<orders.length();
+
     for(int i=0;i<orders.length();i++){
         ordList.append(QString::number(orders.at(i)));
     }
@@ -281,24 +292,25 @@ void MainWindow::refreshOrders(){
 
     ui->ordersTable->setRowCount(static_cast<int>(ceil(static_cast<double>(ordList.length())/5)));
 
-    qDebug()<<ceil(static_cast<int>(static_cast<double>(ordList.length())/5));
+    //Odwiezenie w aktualnym oknie oraz w oknie widocznym dla klientow
     for(int i=0;i<ordList.length();i++){
         ordItem = new QTableWidgetItem(ordList.at(i));
         ordItem->setTextAlignment(Qt::AlignCenter);
         ordItem->setFont(ordersFont);
         if(ordersState.at(i) == 1)
             ordItem->setBackgroundColor(Qt::yellow);
-        if(ordersState.at(i) == 2)
+        else if(ordersState.at(i) == 2){
             ordItem->setBackgroundColor(QColor(254,127,0,255));
-        if(ordersState.at(i) == 3){
+        }
+        else if(ordersState.at(i) == 3){
             ordItem->setBackgroundColor(Qt::green);
         }
 
 
         row = static_cast<int>(ceil(static_cast<double>(i+1)/5))-1;
-        qDebug()<<row;
+
         col = i % 5;
-        qDebug()<<"Dodaje item na pozycji "<<row<<" "<<col;
+
 
         ui->ordersTable->setItem(row,col,ordItem);
 
@@ -320,19 +332,14 @@ void MainWindow::loadSettingsFromDB(){
     server->setIpAdress(db->readIp_fromDb());
     server->setPortNumber(db->readPort_fromDb());
     order = db->getNextNumber_fromDb();
-    qDebug()<<"Ostatnie zamowienie z bazy "<<order;
-    qDebug()<<"Dlugosc listy zamowien przed: "<<orders.length();
-    qDebug()<<"Dlugosc listy stanow przed: "<<ordersState.length();
-    qDebug()<<"Dlugosc listy czasow przed: "<<ordersTime.length();
+
 
     for(int i=0;i<db->getTimes_fromDb().length();i++){
         orders.append(db->getOrders_fromDb().at(i));
         ordersState.append(db->getStates_fromDb().at(i));
         ordersTime.append(db->getTimes_fromDb().at(i));
     }
-    qDebug()<<"Dlugosc listy zamowien po: "<<orders.length();
-    qDebug()<<"Dlugosc listy stanow po: "<<ordersState.length();
-    qDebug()<<"Dlugosc listy czasow po: "<<ordersTime.length();
+
     sortOrders();
     refreshOrders();
 
@@ -356,3 +363,20 @@ void MainWindow::ordersReset(){
     refreshOrders();
     server->sendAllOrders(orders,ordersState,ordersTime,order);
 }
+
+void MainWindow::soundSignal(){
+    bell->play();
+}
+
+
+void MainWindow::closeEvent(QCloseEvent *event){
+     QMessageBox::StandardButton reply;
+     reply = QMessageBox::question(this, "Wyjście", "Czy napewno zamknąć program?",
+                                    QMessageBox::Yes|QMessageBox::No);
+      if (reply == QMessageBox::Yes) {
+        event->accept();
+      } else {
+        event->ignore();
+      }
+}
+

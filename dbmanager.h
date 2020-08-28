@@ -14,28 +14,27 @@ class dbManager
 {
 public:
     dbManager(QObject *parent);
+    ~dbManager();
 
-    bool addIp_port_toDb(QString pp,int port);
+    bool addIp_port_toDb(QString pp,int port);                      //Metoda dodająca lub aktualizująca ip i port w bazie danych
 
-    QString readIp_fromDb();
-    int readPort_fromDb();
+    QString readIp_fromDb();                                        //Metoda odczytująca ip z bazy danych
+    int readPort_fromDb();                                          //Metoda odczytująca port z bazy danych
 
-    void addOrder_toDb(int ord,int state,QString time);
-    void deleteOrder_fromDb(int ord);
-    void updateOrder_inDb(int order,int state);
+    void addOrder_toDb(int ord,int state,QString time);             //Metoda dodający numer,stan oraz czas zamowienia do bazy danych
+    void deleteOrder_fromDb(int ord);                               //Metoda usuwajaca dane zamowienie razem ze stanem i czasem z bazy danych
+    void updateOrder_inDb(int order,int state);                     //Metoda aktualizująca stan danego zamówienia w bazie danych
 
-    void saveNextNumber_toDb(int number);
-    int getNextNumber_fromDb();
+    void saveNextNumber_toDb(int number);                           //Metoda aktualizująca nastepne zamówienie w bazie danych
+    int getNextNumber_fromDb();                                     //Metoda pobierająca następne zamówienie z bazy danych
 
-    QVector<int> getOrders_fromDb();
-    QVector<int> getStates_fromDb();
-    QVector<QString> getTimes_fromDb();
+    QVector<int> getOrders_fromDb();                                //Metoda pobierająca wszystkie zamówienia z bazy danych
+    QVector<int> getStates_fromDb();                                //Metoda pobierająca wszystkie stany z bazy danych
+    QVector<QString> getTimes_fromDb();                             //Metoda pobierająca wszystkie czasy z bazy danych
 
 private:
-    void startDatabase();
+    void startDatabase();                                           //Metoda konfigurująca baze danych przy starcie programu
 
-
-    QString dbPath = "";
     QSqlQuery *query;
     QSqlDatabase db;
 

@@ -35,40 +35,40 @@ public:
     explicit TcpServer(QObject *parent);
     ~TcpServer();
 
-    void startServer();
-    void stopServer();
-    void sendAllOrders(QVector<int> orders,QVector<int> states,QVector<QString> times,int order);
+    void startServer();                                                                             //Włączenie serwera
+    void stopServer();                                                                              //Zatrzymanie serwera
+    void sendAllOrders(QVector<int> orders,QVector<int> states,QVector<QString> times,int order);   //Wysłanie do wszystkich podłączonych klientów aktualnej listy zamowien/stanów/czasów/nastepnego numeru zamowienia
 
-    void setIpAdress(QString ip);
-    void setPortNumber(int port);
-    QString getIpAdress();
-    int getPortNumber();
+    void setIpAdress(QString ip);                                                                   //Setter do ustawienia adresu ip serwera
+    void setPortNumber(int port);                                                                   //Setter do ustawienia portu serwera
+    QString getIpAdress();                                                                          //Getter do pobrania ip serwera
+    int getPortNumber();                                                                            //Getter do pobrania portu serwera
 
 signals:
-    void isStartingFailed(bool a);
-    void serverStopped();
+    void isStartingFailed(bool a);                                                                  //Sygnał czy udało się wystartować serwer
+    void serverStopped();                                                                           //Sygnał o zatrzymaniu serwera
 
-    void onOrderOperation(int order,int state);
-    void makeSoundSignal();
-    void recoverLastOrder();
-    void addNewOrder();
-    void serverFullScreen();
-    void resetOrders();
+    void onOrderOperation(int order,int state);                                                     //Sygnał po otrzymaniu komendy od klienta o zmiany stanu danego zamówienia
+    void makeSoundSignal();                                                                         //Sygnał po otrzymaniu komendy od klienta o uzycie sygnału dźwiękowego
+    void recoverLastOrder();                                                                        //Sygnał po otrzymaniu komendy od klienta o przywrocenie jednego zamowienia
+    void addNewOrder();                                                                             //Sygnał po otrzymaniu komendy od klienta o dodanie nowego zamowienia do listy
+    void serverFullScreen();                                                                        //Sygnal po otrzymaniu komendy od klienta o wlaczenie/wylaczenie trybu pelnoekranowego okna widocznego dla klientóW
+    void resetOrders();                                                                             //Sygnał po otrzymaniu komendy od klienta o zresetowanie listy zamowien/stanów/czasów i numeru nastepnego zamowienia
 
 private slots:
-    void readClientCommand();
-    void sendApprove(QVector<int> orders,QVector<int> states,QVector<QString> times,int order);
-    void disconnectClient();
+    void readClientCommand();                                                                       //Slot odczytujacy komende otrzymaną od klienta
+    void sendApprove(QVector<int> orders,QVector<int> states,QVector<QString> times,int order);     //Slot przy pierwszym podłączeniu się każdego klienta wysylajacy dodatkowo potwierdzenie polaczenia do klienta
+    void disconnectClient();                                                                        //Slot przyjmujacy sygnał o rozłączeniu się klienta od serwera
 
 private:
-    QString ipAdr = "172.16.108.177";
-    quint16 port = 51268;
-    QVector<QTcpSocket*> clientConnection;
+    QString ipAdr = "172.16.108.177";                                                               //Ip serwera
+    quint16 port = 51268;                                                                           //Port serwera
+    QVector<QTcpSocket*> clientConnection;                                                          //Lista socketów tj. podłączonych klientów
 
-    void connectSignals();
-    int ordNumber(QString command);
-    int stateNumber(QString command);
-    QString makeDatagram(QVector<int> orders,QVector<int> states,QVector<QString> times,int order);
+
+    int ordNumber(QString command);                                                                 //Metoda wyłuskający numer zamówienia z łańcucha znaków
+    int stateNumber(QString command);                                                               //Metoda wyłuskający numer stanu zamówienia z łańcucha znaków
+    QString makeDatagram(QVector<int> orders,QVector<int> states,QVector<QString> times,int order); //Metoda tworząca datagram tj. łańcuch znaków z listy zamówień,stanów,czasów i numeru następnego zamówienia
 
 };
 

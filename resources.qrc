@@ -1,6 +1,11 @@
 <RCC>
     <qresource prefix="/new/images">
         <file>img/sound_icon.png</file>
+        <file>img/serverIcon.ico</file>
     </qresource>
     <qresource prefix="/database"/>
+    <qresource prefix="/sound"/>
+    <qresource prefix="/">
+        <file>sound/bell.wav</file>
+    </qresource>
 </RCC>

@@ -5,22 +5,27 @@ dbManager::dbManager(QObject *parent)
     startDatabase();
 }
 
+dbManager::~dbManager()
+{
+    delete query;
+}
 void dbManager::startDatabase(){
     const QString DRIVER("QSQLITE");
     if(QSqlDatabase::isDriverAvailable(DRIVER))
         qDebug()<<"Jest driver";
 
+    //Tworzymy baze danych jesli nie istnieje
     db = QSqlDatabase::addDatabase(DRIVER,"database");
 
     const QString applicationFolder = QStandardPaths::writableLocation(QStandardPaths::ApplicationsLocation);
-    db.setDatabaseName(applicationFolder+"/database.sqllite");
+    db.setDatabaseName(applicationFolder+"/database.sqllite");                                                      //Ustawiamy sciezke bazy danych na lokalizacje aplikacji
 
 
     if(!db.open())
         qWarning() << "ERROR: " << db.lastError();
     query = new QSqlQuery(db);
 
-
+    //Tworzymy tabele jest nie już nie istnieją
     query->exec("CREATE TABLE IF NOT EXISTS orders (id INTEGER PRIMARY KEY, orderNumber INTEGER, orderState INTEGER,orderTime VARCHAR(10))");
 
     query->exec("CREATE TABLE IF NOT EXISTS config (id INTEGER PRIMARY KEY, ipAdress VARCHAR(20), port INTEGER)");

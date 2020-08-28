@@ -11,7 +11,6 @@ public:
     explicit Thread(QObject *parent = nullptr);
 
 private:
-    short int i = 0;
     void run();
 signals:
     void refreshOrders();

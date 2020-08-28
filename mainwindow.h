@@ -15,6 +15,8 @@
 #include <math.h>
 #include <QTime>
 #include <customerswindow.h>
+#include <QCloseEvent>
+#include <QSound>
 
 
 
@@ -33,50 +35,54 @@ public:
 
 signals:
     void sendUpdatedOrders(QStringList orders);
-    void approveConnect(QVector<int> orders,QVector<int> states,QVector<QString> times,int ord);
+    void approveConnect(QVector<int> orders,QVector<int> states,QVector<QString> times,int ord);        //Sygnał z potwierdzeniem nawiązania połączenia
 
 private slots:
-    //void sendApprove();
-    void serverStartingFailed(bool a);
-    void serverStopped();
-    void approveConnection();
 
-    void changeOrder(int order,int state);
+    void serverStartingFailed(bool a);                                                                  //Slot wyswietlajacy informacje ze nie udalo sie wystartowac serwera
+    void serverStopped();                                                                               //Slot wyswietlajacy informacje ze serwer zostal zatrzymany
+    void approveConnection();                                                                           //Slot wysylajacy sygnal do klienta poprzez serwer ze polaczenie zostalo nawiazane
 
+    void changeOrder(int order,int state);                                                              //Slot wykonujacy akcje na zamowienia (zmiana stanu,usuniecie)
 
-    void on_actionKonfiguracja_triggered();
-    void on_actionInformacje_triggered();
+    void on_actionKonfiguracja_triggered();                                                             //Slot do konfiguracji ip/portu
+    void on_actionInformacje_triggered();                                                               //Slot do wyswietlania aktualnego ip/portu
 
+    void on_actionStartServer_triggered();                                                              //Slot do włączenia serwera
 
-    void on_actionStartServer_triggered();
+    void on_actionStopServer_triggered();                                                               //Slot do zatrzymania serwera
 
-    void on_actionStopServer_triggered();
+    void addOrderToList();                                                                              //Slot do dodania nowego zamówienia do listy
 
-    void addOrderToList();
-
-    void recoverDeletedOrder();
+    void recoverDeletedOrder();                                                                         //Slot do przywrócenia jednego zamówienia
 
 
-    void on_actionFull_screen_triggered();
+    void on_actionFull_screen_triggered();                                                              //Slot do włączenia trybu pełnoekranowego tego okna
 
-    void ordersReset();
+    void ordersReset();                                                                                 //Slot do zresetowania wszystkich zamówień i numeru nastepnego zamówienia
+
+    void soundSignal();                                                                                 //Slot wywolujacy sygnał dźwiękowy
 
 private:
     Ui::MainWindow *ui;
-    TcpServer *server;
-    CustomersWindow *custWind;
-    dbManager *db;
+    TcpServer *server;                                                                                  //Klasa do operowania na serwerze i polaczeniem z klientami
+    CustomersWindow *custWind;                                                                          //Klasa z oknem wyswietlanym dla klientów
+    dbManager *db;                                                                                      //Klasa do operowania na bazie danych
 
-    QVector<QString> ordersNotReady;
+    QVector<QString> ordersNotReady;                                                                    //Wektory z zamowieniami rozlozonymi na 3 listy
     QVector<QString> ordersPartReady;
     QVector<QString> ordersReady;
+
 
     QVector<int> orders;
     QVector<int> ordersState;
     QVector<QString> ordersTime;
+
     QVector<int> deletedOrders;
     QVector<int> deletedStates;
     QVector<QString> deletedTimes;
+
+    QSound *bell;
 
 
 
@@ -87,16 +93,14 @@ private:
 
     int order = 0;
 
-    //QVector<QTcpSocket*> clientConnection;
-    void connectSignals();
-    void refreshOrders();
-    void sortOrders();
-    void loadSettingsFromDB();
+    void connectSignals();                                                                              //Polączenie sygnałow ze slotami
+    void refreshOrders();                                                                               //Odswiezenie zamówień w oknie
+    void sortOrders();                                                                                  //Sortowanie zamówień w kolejnosci rosnacej
+    void loadSettingsFromDB();                                                                          //Zaladowanie danych z bazy danych
+
+    void closeEvent(QCloseEvent *event);
 
 
-
-    //void readClientCommand();
-    //void sendAllOrders();
 
 };
 #endif // MAINWINDOW_H

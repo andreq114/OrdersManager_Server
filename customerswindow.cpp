@@ -11,10 +11,7 @@ CustomersWindow::CustomersWindow(QWidget *parent) :
 
     connectSignals();
     startPreferences();
-    //allOrders.append(1);
-    //allOrders.append(2);
-    //allOrders.append(3);
-    //allOrders.append(4);
+
 }
 
 CustomersWindow::~CustomersWindow()
@@ -44,14 +41,10 @@ void CustomersWindow::connectSignals(){
 
 void CustomersWindow::startPreferences(){
 
-    //this->setWindowFlag(Qt::WindowStaysOnTopHint);
+    setWindowFlags(Qt::Window | Qt::WindowMinimizeButtonHint | Qt::WindowMaximizeButtonHint);           //Zablokowanie mozliwosci zamkniecia okienka z krzyzyka
 
-
-
-    setWindowFlags(Qt::Window | Qt::WindowMinimizeButtonHint | Qt::WindowMaximizeButtonHint);
-
-
-    titleFont.setBold(true);
+    this->setWindowTitle("Clients Window");
+    titleFont.setBold(true);                                                                            //Konfiguracja czcionek
     titleFont.setPointSize(74);
     descrFont.setBold(true);
     descrFont.setPointSize(60);
@@ -61,12 +54,11 @@ void CustomersWindow::startPreferences(){
     ordersWidget = new QTableWidget();
     ordersWidget->setStyleSheet("background-color:transparent;");
 
+
     centralLayout = new QVBoxLayout();
     titleLay = new QHBoxLayout();
     tabWidgLay = new QHBoxLayout();
     tabWidgLay2 = new QVBoxLayout();
-
-
 
 
     titleLabel = new QLabel();
@@ -95,11 +87,9 @@ void CustomersWindow::refreshOrdersTables(QVector<int> order,QVector<int> states
     splitOrders(order,states);
     actualOrdersPage = 1;
     maxOrdersPage =static_cast<int>(ceil(static_cast<double>(order.length())/5));
-    myThread->quit();          //Nie mam pewnosci czy zadziala
+    myThread->quit();
     showNext();
     myThread->start();
-
-
 
 }
 
@@ -132,9 +122,7 @@ void CustomersWindow::splitOrders(QVector<int> orders,QVector<int> states){
     }
 }
 
-
 void CustomersWindow::showNext(){
-
 
     delete ordersWidget;
     ordersWidget = new QTableWidget();
@@ -143,15 +131,16 @@ void CustomersWindow::showNext(){
     ordersWidget->setStyleSheet("background-color:transparent;");
     ordersWidget->setSelectionMode(QTableWidget::NoSelection);
 
-
+    //Włączamy dopasowanie automatyczne w poziomie
     ordersWidget->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
 
 
+    //Wyłączamy headery
     ordersWidget->horizontalHeader()->setVisible(false);
     ordersWidget->verticalHeader()->setVisible(false);
 
 
-
+    //Warunki do przełączania między tabelami z zamówieniami podczas odswiezania
     if(actualOrdersPage == 1){
         dispTable(0,5);
     }
@@ -193,7 +182,6 @@ void CustomersWindow::dispTable(int a,int b){
     }
     ordersWidget->setRowCount(b_temp-a);
     ordersWidget->setColumnCount(2);
-    qDebug()<<"Wysokosc glownego okna ";
     for(int i=a;i<b_temp;i++){
         ordersWidget->setRowHeight(i-a,350);
 
