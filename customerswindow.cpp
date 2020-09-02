@@ -36,7 +36,7 @@ CustomersWindow::~CustomersWindow()
 }
 
 void CustomersWindow::connectSignals(){
-    connect(myThread,SIGNAL(refreshOrders()),this,SLOT(showNext()));
+    connect(myThread,SIGNAL(refreshOrders(bool)),this,SLOT(showNext(bool)));
 }
 
 void CustomersWindow::startPreferences(){
@@ -47,11 +47,14 @@ void CustomersWindow::startPreferences(){
     titleFont.setBold(true);                                                                            //Konfiguracja czcionek
     titleFont.setPointSize(74);
     descrFont.setBold(true);
-    descrFont.setPointSize(60);
+    descrFont.setPointSize(65);
     ordersFont.setBold(true);
-    ordersFont.setPointSize(200);
+    ordersFont.setPointSize(250);
+
+
 
     ordersWidget = new QTableWidget();
+
     ordersWidget->setStyleSheet("background-color:transparent;");
 
 
@@ -64,6 +67,7 @@ void CustomersWindow::startPreferences(){
     titleLabel = new QLabel();
     titleLabel->setAlignment(Qt::AlignCenter);
     titleLabel->setFont(titleFont);
+    titleLabel->setWordWrap(true);
 
     titleLabel->setText("Zamówienia");
 
@@ -85,11 +89,22 @@ void CustomersWindow::startPreferences(){
 
 void CustomersWindow::refreshOrdersTables(QVector<int> order,QVector<int> states){
     splitOrders(order,states);
-    actualOrdersPage = 1;
     maxOrdersPage =static_cast<int>(ceil(static_cast<double>(order.length())/5));
-    myThread->quit();
-    showNext();
-    myThread->start();
+    if(fullReadyOrders.length()+partReadyOrders.length() > prevReadyNumber){
+        actualOrdersPage = 0;
+        myThread->terminate();
+        myThread->start();
+    }else{
+        qDebug()<<"Doszlo nowe lub usunieto";
+        showNext(false);
+    }
+
+    qDebug()<<"Gotowych teraz: "<<fullReadyOrders.length()+partReadyOrders.length();
+    qDebug()<<"Gotowych poprzednio: "<<prevReadyNumber;
+    prevReadyNumber = fullReadyOrders.length()+partReadyOrders.length();
+
+
+
 
 }
 
@@ -120,9 +135,10 @@ void CustomersWindow::splitOrders(QVector<int> orders,QVector<int> states){
         allOrders.append(notReadyOrders.at(i));
         allStates.append(1);
     }
+
 }
 
-void CustomersWindow::showNext(){
+void CustomersWindow::showNext(bool setNextPage){
 
     delete ordersWidget;
     ordersWidget = new QTableWidget();
@@ -141,6 +157,19 @@ void CustomersWindow::showNext(){
 
 
     //Warunki do przełączania między tabelami z zamówieniami podczas odswiezania
+
+    if(setNextPage == true){
+        qDebug()<<"Przeskakuje w kolejną strone";
+        if(actualOrdersPage == maxOrdersPage)
+            actualOrdersPage = 1;
+        else
+            actualOrdersPage++;
+    }
+
+
+    if(actualOrdersPage > maxOrdersPage)
+        actualOrdersPage = maxOrdersPage;
+
     if(actualOrdersPage == 1){
         dispTable(0,5);
     }
@@ -171,6 +200,8 @@ void CustomersWindow::showNext(){
     else if(actualOrdersPage == 10){
         dispTable(45,50);
     }
+
+
 }
 
 void CustomersWindow::dispTable(int a,int b){
@@ -190,9 +221,12 @@ void CustomersWindow::dispTable(int a,int b){
         descItem = new QTableWidgetItem();
 
 
+
+
         ordItem->setText(QString::number(allOrders.at(i)));
         ordItem->setFont(ordersFont);
         ordItem->setTextAlignment(Qt::AlignCenter);
+
 
         descItem->setFont(descrFont);
         descItem->setTextAlignment(Qt::AlignCenter);
@@ -215,10 +249,10 @@ void CustomersWindow::dispTable(int a,int b){
         ordersWidget->setItem(i-a,1,descItem);
 
     }
-    if(actualOrdersPage == maxOrdersPage)
-        actualOrdersPage = 1;
-    else
-        actualOrdersPage++;
+
+
+    ordersWidget->setShowGrid(false);
+    ordersWidget->setItemDelegate(new myDelegate(2, ordersWidget));
 }
 
 void CustomersWindow::setFullScreen(){
@@ -228,3 +262,5 @@ void CustomersWindow::setFullScreen(){
         this->setWindowState(Qt::WindowFullScreen);
     }
 }
+
+

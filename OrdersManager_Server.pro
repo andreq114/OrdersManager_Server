@@ -24,6 +24,7 @@ SOURCES += \
     dbmanager.cpp \
     main.cpp \
     mainwindow.cpp \
+    myDelegate.cpp \
     tcpserver.cpp \
     thread.cpp
 
@@ -31,6 +32,7 @@ HEADERS += \
     customerswindow.h \
     dbmanager.h \
     mainwindow.h \
+    myDelegate.h \
     tcpserver.h \
     thread.h
 

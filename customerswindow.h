@@ -11,6 +11,7 @@
 #include <thread.h>
 #include <QHeaderView>
 #include <QtMath>
+#include <mydelegate.h>
 
 namespace Ui {
 class CustomersWindow;
@@ -27,7 +28,7 @@ public:
     void setFullScreen();                                                       //Ustawianie trybu pelnego ekranu dla tego okna
 
 public slots:
-    void showNext();                                                            //Jesli zamowien jest wiecej niz 5, przeskakiwanie miedzy ekranami
+    void showNext(bool setNextPage);                                                            //Jesli zamowien jest wiecej niz 5, przeskakiwanie miedzy ekranami
 
 private:
     Ui::CustomersWindow *ui;
@@ -57,6 +58,7 @@ private:
 
     int actualOrdersPage = 1;                                                   //Aktualna strona z zamówieniami
     int maxOrdersPage = 1;                                                      //Liczba wszystkich stron z zamówieniami
+    int prevReadyNumber = 0;
 
     void startPreferences();                                                    //Początkowe ustawienia okna (rysowanie gui)
 

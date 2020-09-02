@@ -13,7 +13,7 @@ public:
 private:
     void run();
 signals:
-    void refreshOrders();
+    void refreshOrders(bool setNextPagSig);
 
 };
 

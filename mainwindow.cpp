@@ -163,8 +163,8 @@ void MainWindow::on_actionKonfiguracja_triggered() //Okienko do zmiany adresu ip
         QMessageBox::information(this,"Blad","Serwer musi zostać najpierw zatrzymany.");
     }else{
         QDialog dialog(this);
-        dialog.setMinimumSize(200,170);
-        dialog.setMaximumSize(200,170);
+        dialog.setMinimumSize(200,150);
+        dialog.setMaximumSize(200,150);
         QFormLayout lay(&dialog);
 
         lay.addRow(new QLabel("Adres IP serwera:"));
@@ -207,8 +207,8 @@ void MainWindow::on_actionInformacje_triggered()
 {
     QDialog dialog(this);
     QFormLayout lay(&dialog);
-    dialog.setMinimumSize(200,170);
-    dialog.setMaximumSize(200,150);
+    dialog.setMinimumSize(200,140);
+    dialog.setMaximumSize(200,140);
 
     lay.addRow(new QLabel("Adres IP serwera:"));
     lay.addRow (new QLabel(server->getIpAdress()));
